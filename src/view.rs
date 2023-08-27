@@ -23,14 +23,14 @@ pub fn todo_list_item(todo: &Todo) -> Markup {
 
     html! {
         tr {
-            td #(done_id) {
+            td #(done_id) hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
                 (todo_done_indicator(todo.done))
             }
-            td {
+            td  style="cursor: default; user-select: none;"  {
                 (todo.title)
             }
             td {
-                button type="button" hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" hx-target={"#"(done_id)} { "toggle" }
+                // button type="button" hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" hx-target={"#"(done_id)} { "toggle" }
             }
         }
     }
