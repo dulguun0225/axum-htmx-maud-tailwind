@@ -3,7 +3,7 @@ pub mod todo;
 use sqlx::{postgres::PgPoolOptions, query, Pool, Postgres};
 
 
-pub static DB_STRING: &str = "postgres://postgres:postgres@localhost/todos_db";
+pub static DB_STRING: &str = "postgres://postgres:postgres@localhost/postgres";
 
 pub async fn init() -> Pool<Postgres> {
     let result = PgPoolOptions::new()

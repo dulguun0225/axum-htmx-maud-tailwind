@@ -185,6 +185,7 @@ dependencies = [
  "futures",
  "lazy_static",
  "maud",
+ "serde",
  "sqlx",
  "tokio",
  "tower",
