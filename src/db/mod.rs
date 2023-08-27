@@ -1,9 +1,7 @@
 pub mod todo;
 
-use sqlx::{postgres::PgPoolOptions, query, Database, Pool, Postgres};
-use sqlx::postgres::{PgRow, types::*};
+use sqlx::{postgres::PgPoolOptions, query, Pool, Postgres};
 
-use self::todo::Todo;
 
 pub static DB_STRING: &str = "postgres://postgres:postgres@localhost/todos_db";
 
@@ -46,8 +44,4 @@ pub async fn init() -> Pool<Postgres> {
     }
 
     pool
-}
-
-pub fn todos_list<DB: Database>(pool: &Pool<DB>) {
-    let mut stream = sqlx::query_as::<_, Todo>("SELECT id, title, done FROM todos").fetch_all(pool).await;
 }

@@ -1,12 +1,22 @@
-use std::time;
-use sqlx::postgres::{PgPoolOptions, PgRow, types::*};
-use sqlx::{FromRow, Row, Decode, };
+use sqlx::{prelude::*, Pool, Postgres};
+
+// use std::time;
 
 #[derive(Debug, FromRow, Clone)]
 pub struct Todo {
-    id: i64,
-    title: String,
-    done: bool,
-    // created_at: time::SystemTime,
-    // updated_at: time::SystemTime,
+    pub id: i64,
+    pub title: String,
+    pub done: bool,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+
+pub async fn get_todos(pool: &Pool<Postgres>) -> Vec<Todo> {
+    let todos = sqlx::query_as::<_, Todo>("SELECT id, title, done FROM todos")
+        .fetch_all(pool)
+        .await
+        .unwrap();
+
+    todos
 }

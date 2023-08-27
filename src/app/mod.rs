@@ -1,10 +1,11 @@
 use axum::{
+    extract::State,
     response::IntoResponse,
     routing::{get, post},
-    Router, extract::State,
+    Router,
 };
 use maud::{html, Markup};
-use sqlx::{Postgres, Pool};
+use sqlx::{Pool, Postgres};
 use std::{net::SocketAddr, sync::Arc};
 use tracing::*;
 
@@ -16,11 +17,14 @@ async fn clicked() -> Markup {
 }
 
 async fn index(State(pool): State<Arc<Pool<Postgres>>>) -> impl IntoResponse {
+    let todos = crate::db::todo::get_todos(&pool).await;
+    debug!("{:?}", todos);
     crate::view::index()
 }
 
 pub async fn start() {
     let pool = crate::db::init().await;
+
     let router = Router::new()
         .route("/", get(index))
         .route("/", post(clicked))
