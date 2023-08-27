@@ -1,15 +1,27 @@
-use axum::{response::IntoResponse, routing::get, Router};
+use axum::{
+    response::IntoResponse,
+    routing::{get, post},
+    Router,
+};
 use maud::{html, Markup};
 use std::net::SocketAddr;
+use tracing::*;
 
-async fn index() -> impl IntoResponse {
+async fn clicked() -> Markup {
+    debug!("clicked");
     html! {
-        h1 { "Hello World"}
+        div { "click works" }
     }
 }
 
+async fn index() -> impl IntoResponse {
+    crate::view::index()
+}
+
 pub async fn start() {
-    let router = Router::new().route("/", get(index));
+    let router = Router::new()
+        .route("/", get(index))
+        .route("/", post(clicked));
     // run our app with hyper, listening globally on port 3000
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     tracing::debug!("listening on {}", addr);
