@@ -10,6 +10,11 @@ axum = { version = "0.6.20", features = ["default"] }
 axum-extra = "0.7.7"
 lazy_static = "1.4.0"
 maud = { version = "0.25.0", features = ["axum"] }
+sqlx = { version = "0.7.1", features = [
+  "runtime-tokio",
+  "tls-native-tls",
+  "postgres",
+] }
 tokio = { version = "1.32.0", features = ["full"] }
 tower = { version = "0.4.13", features = ["full"] }
 tower-http = { version = "0.4.3", features = ["full"] }

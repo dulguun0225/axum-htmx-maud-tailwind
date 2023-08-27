@@ -4,9 +4,9 @@ use axum::{
     Router,
 };
 use maud::{html, Markup};
+use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tracing::*;
-
 async fn clicked() -> Markup {
     debug!("clicked");
     html! {
@@ -19,6 +19,12 @@ async fn index() -> impl IntoResponse {
 }
 
 pub async fn start() {
+    let pool = PgPoolOptions::new()
+        .max_connections(8)
+        .connect("postgrse://postgres:postgres@localhost")
+        .await
+        .unwrap();
+
     let router = Router::new()
         .route("/", get(index))
         .route("/", post(clicked));
