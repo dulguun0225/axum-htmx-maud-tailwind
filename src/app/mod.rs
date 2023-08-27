@@ -1,14 +1,13 @@
 use axum::{
-    extract::{Path, RawForm, State},
+    extract::{Path, State},
     response::IntoResponse,
-    routing::{get, post, delete, patch},
+    routing::{get, patch, post},
     Form, Router,
 };
-use maud::{html, Markup};
-use serde::{Deserialize, Serialize};
+use maud::Markup;
+use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 use std::net::SocketAddr;
-use tracing::*;
 
 use crate::{db::todo::insert, view::todo_list_item};
 
