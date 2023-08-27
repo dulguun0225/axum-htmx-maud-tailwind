@@ -5,27 +5,32 @@ use crate::db::todo::Todo;
 fn header() -> Markup {
     html! {
         (DOCTYPE)
-        title { "maud" }
+        title { "TODO" }
         script src="https://unpkg.com/htmx.org@1.9.5" {}
         // script src="https://cdn.tailwindcss.com" {}
     }
 }
 
+pub static DONE: &'static str = "☑";
+pub static NOT_DONE: &'static str = "☐";
+
+pub fn todo_done_indicator(done: bool) -> &'static str {
+    if done { DONE } else { NOT_DONE }
+}
+
 pub fn todo_list_item(todo: &Todo) -> Markup {
+    let done_id = format!("indicator-{}", todo.id);
+
     html! {
         tr {
-            td {
-                @if todo.done {
-                    "☑"
-                } @else {
-                    "☐"
-                }
+            td #(done_id) {
+                (todo_done_indicator(todo.done))
             }
             td {
                 (todo.title)
             }
             td {
-                button type="button" { "toggle" }
+                button type="button" hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" hx-target={"#"(done_id)} { "toggle" }
             }
         }
     }

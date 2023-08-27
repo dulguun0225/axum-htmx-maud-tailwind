@@ -1,5 +1,5 @@
 use axum::{
-    extract::{RawForm, State},
+    extract::{RawForm, State, Path},
     response::IntoResponse,
     routing::{get, post},
     Form, Router,
@@ -10,7 +10,7 @@ use sqlx::{Pool, Postgres};
 use std::net::SocketAddr;
 use tracing::*;
 
-use crate::{db::todo::insert_todo, view::todo_list_item};
+use crate::{db::todo::insert, view::todo_list_item};
 
 async fn clicked() -> Markup {
     debug!("clicked");
@@ -20,7 +20,7 @@ async fn clicked() -> Markup {
 }
 
 async fn index(State(pool): State<Pool<Postgres>>) -> impl IntoResponse {
-    let todos = crate::db::todo::get_todos(&pool).await;
+    let todos = crate::db::todo::get_all(&pool).await;
     crate::view::index(&todos)
 }
 
@@ -31,8 +31,14 @@ struct InsertInput {
 }
 
 async fn insert_handler(State(pool): State<Pool<Postgres>>, Form(data): Form<InsertInput>) -> Markup {
-    let todo = insert_todo(&pool, &data.title).await.unwrap();
+    let todo = insert(&pool, &data.title).await.unwrap();
     todo_list_item(&todo)
+}
+
+async fn toggle_handler(Path(id): Path<i64>, State(pool): State<Pool<Postgres>>) -> &'static str {
+    let toggle_result = crate::db::todo::toggle(&pool, &id).await.unwrap();
+
+    crate::view::todo_done_indicator(toggle_result)
 }
 
 pub async fn start() {
@@ -42,6 +48,7 @@ pub async fn start() {
         .route("/", get(index))
         .route("/", post(clicked))
         .route("/insert", post(insert_handler))
+        .route("/toggle/:id", post(toggle_handler))
         .with_state(pool);
     // run our app with hyper, listening globally on port 3000
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
