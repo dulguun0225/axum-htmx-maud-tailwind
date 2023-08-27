@@ -10,10 +10,15 @@ pub struct Todo {
 }
 
 pub async fn get_all(pool: &Pool<Postgres>) -> Vec<Todo> {
-    let todos = sqlx::query_as::<_, Todo>("SELECT id, title, done FROM todos")
-        .fetch_all(pool)
-        .await
-        .unwrap();
+    let todos = sqlx::query_as::<_, Todo>(
+        r#"
+            SELECT id, title, done 
+            FROM todos 
+            ORDER BY id"#,
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap();
 
     todos
 }
@@ -42,4 +47,20 @@ pub async fn toggle(pool: &Pool<Postgres>, id: &i64) -> anyhow::Result<bool> {
     .await?;
 
     Ok(res.0)
+}
+
+pub async fn delete(pool: &Pool<Postgres>, id: &i64) -> anyhow::Result<()> {
+    let res = sqlx::query(
+        r#"
+        DELETE FROM todos
+        WHERE id = $1
+    "#,
+    )
+    .bind(id)
+    .execute(pool)
+    .await?;
+
+    tracing::debug!("{:?}", res);
+
+    Ok(())
 }

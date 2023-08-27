@@ -15,22 +15,27 @@ pub static DONE: &'static str = "☑";
 pub static NOT_DONE: &'static str = "☐";
 
 pub fn todo_done_indicator(done: bool) -> &'static str {
-    if done { DONE } else { NOT_DONE }
+    if done {
+        DONE
+    } else {
+        NOT_DONE
+    }
 }
 
 pub fn todo_list_item(todo: &Todo) -> Markup {
     let done_id = format!("indicator-{}", todo.id);
+    let item_id = format!("todo-{}", todo.id);
 
     html! {
-        tr {
-            td #(done_id) hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
+        tr #(item_id){
+            td #(done_id) hx-patch={"/"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
                 (todo_done_indicator(todo.done))
             }
             td  style="cursor: default; user-select: none;"  {
                 (todo.title)
             }
             td {
-                // button type="button" hx-post={"/toggle/"(todo.id)} hx-swap="innerHTML" hx-target={"#"(done_id)} { "toggle" }
+                button type="button" hx-delete={"/"(todo.id)} hx-swap="delete" hx-target={"#"(item_id)} { "Delete" }
             }
         }
     }
@@ -44,7 +49,7 @@ pub fn index(todos: &[Todo]) -> Markup {
 
             div class="border max-w-7xl" {
 
-                form hx-post="/insert" hx-swap="beforeend" hx-target="#list tbody"{
+                form hx-post="/" hx-swap="beforeend" hx-target="#list tbody"{
                     input name="title" type="text" ;
                     button type="submit" { "Submit" }
                 }
