@@ -27,24 +27,23 @@ pub async fn get_pool() -> &'static Pool<Postgres> {
 }
 
 pub async fn init() {
-    let pool = get_pool().await;
     let create_tables_result = query(
         r#"
         CREATE TABLE IF NOT EXISTS todos (
             id serial PRIMARY KEY,
             title text NOT NULL,
             done boolean NOT NULL DEFAULT false,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT a::todo_list_itemURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
     "#,
     )
-    .execute(pool)
+    .execute(get_pool().await)
     .await;
 
     match create_tables_result {
         Ok(r) => {
-            tracing::debug!("Create table result {:?}", r);
+            debug!("Create table result {:?}", r);
         }
         Err(e) => {
             tracing::error!("{}", e.to_string());

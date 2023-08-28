@@ -1,5 +1,7 @@
 use crate::db::get_pool;
 use sqlx::prelude::*;
+// use tracing::*;
+
 #[derive(Debug, FromRow, Clone)]
 pub struct Todo {
     pub id: i32,
@@ -10,32 +12,27 @@ pub struct Todo {
 }
 
 pub async fn get_all() -> Vec<Todo> {
-    let pool = get_pool().await;
     sqlx::query_as::<_, Todo>(
         r#"
             SELECT id, title, done 
             FROM todos 
             ORDER BY id"#,
     )
-    .fetch_all(pool)
+    .fetch_all(get_pool().await)
     .await
     .unwrap()
 }
 
 pub async fn insert(title: &str) -> anyhow::Result<Todo> {
-    let pool = get_pool().await;
-    let todo = sqlx::query_as::<_, Todo>(
-        "INSERT INTO todos (title) VALUES ($1) RETURNING id, title, done",
-    )
-    .bind(title)
-    .fetch_one(pool)
-    .await?;
+    let todo = sqlx::query_as::<_, Todo>("INSERT INTO todos (title) VALUES ($1) RETURNING *")
+        .bind(title)
+        .fetch_one(get_pool().await)
+        .await?;
 
     Ok(todo)
 }
 
 pub async fn toggle(id: &i64) -> anyhow::Result<bool> {
-    let pool = get_pool().await;
     let res: (bool,) = sqlx::query_as(
         r#"
         UPDATE todos
@@ -44,25 +41,23 @@ pub async fn toggle(id: &i64) -> anyhow::Result<bool> {
         RETURNING done"#,
     )
     .bind(id)
-    .fetch_one(pool)
+    .fetch_one(get_pool().await)
     .await?;
 
     Ok(res.0)
 }
 
-pub async fn delete(id: &i64) -> anyhow::Result<()> {
-    let pool = get_pool().await;
-    let res = sqlx::query(
+pub async fn delete(id: &i64) -> anyhow::Result<Todo> {
+    let todo = sqlx::query_as::<_, Todo>(
         r#"
         DELETE FROM todos
         WHERE id = $1
+        RETURNING *
     "#,
     )
     .bind(id)
-    .execute(pool)
+    .fetch_one(get_pool().await)
     .await?;
 
-    tracing::debug!("{:?}", res);
-
-    Ok(())
+    Ok(todo)
 }
