@@ -1,9 +1,10 @@
-pub use tracing::*;
-
-pub use axum::{
+pub mod pool;
+use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+pub use tracing::*;
+
 // Make our own error that wraps `anyhow::Error`.
 pub struct AppError(anyhow::Error);
 

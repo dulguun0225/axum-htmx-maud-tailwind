@@ -1,8 +1,6 @@
 mod app;
-mod db;
-pub mod prelude;
+mod todo;
 mod tracing;
-pub mod view;
 
 #[tokio::main]
 async fn main() {
