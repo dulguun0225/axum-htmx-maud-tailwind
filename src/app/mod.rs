@@ -1,11 +1,13 @@
-use axum::Router;
+use axum::{routing::*, response::{ Redirect}};
 
 use std::net::SocketAddr;
 use tower_http::services::ServeDir;
 
+
 pub async fn start() {
     let public_dir = ServeDir::new("public");
     let router = Router::new()
+        .route("/", get(Redirect::permanent("/todo")))
         .nest("/todo", crate::todo::new().await)
         .nest_service("/public", public_dir.clone())
         .fallback_service(public_dir);

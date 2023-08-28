@@ -34,7 +34,6 @@ async fn delete_handler(Path(id): Path<i64>) -> Result<(), AppError> {
 pub async fn new() -> Router {
     db::init().await;
     Router::new()
-        .route("/", get(index))
-        .route("/", post(insert_handler))
+        .route("/", get(index).post(insert_handler))
         .route("/:id", patch(toggle_handler).delete(delete_handler))
 }

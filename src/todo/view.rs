@@ -27,14 +27,14 @@ pub fn todo_list_item(todo: &Todo) -> Markup {
 
     html! {
         tr #(item_id){
-            td #(done_id) hx-patch={"./"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
+            td #(done_id) hx-patch={"/todo/"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
                 (todo_done_indicator(todo.done))
             }
             td  style="cursor: default; user-select: none;"  {
                 (todo.title)
             }
             td {
-                button type="button" hx-delete={"./"(todo.id)} hx-swap="delete" hx-target={"#"(item_id)} { "Delete" }
+                button type="button" hx-delete={"/todo/"(todo.id)} hx-swap="delete" hx-target={"#"(item_id)} { "Delete" }
             }
         }
     }
@@ -48,7 +48,7 @@ pub fn index(todos: &[Todo]) -> Markup {
 
             div class="border max-w-7xl" {
 
-                form hx-post="./" hx-swap="beforeend" hx-target="#list tbody"{
+                form hx-post="/todo" hx-swap="beforeend" hx-target="#list tbody"{
                     label for="insert-input" { "Insert: " }
                     input #insert-input name="title" type="text" placeholder="Title";
                     button type="submit" { "Submit" }
