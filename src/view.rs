@@ -50,7 +50,8 @@ pub fn index(todos: &[Todo]) -> Markup {
             div class="border max-w-7xl" {
 
                 form hx-post="/" hx-swap="beforeend" hx-target="#list tbody"{
-                    input name="title" type="text" ;
+                    label for="insert-input" { "Insert: " }
+                    input #insert-input name="title" type="text" placeholder="Title";
                     button type="submit" { "Submit" }
                 }
 
