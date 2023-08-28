@@ -32,8 +32,9 @@ pub async fn init() {
         CREATE TABLE IF NOT EXISTS todos (
             id serial PRIMARY KEY,
             title text NOT NULL,
+            CHECK (title <> ''),
             done boolean NOT NULL DEFAULT false,
-            created_at TIMESTAMP NOT NULL DEFAULT a::todo_list_itemURRENT_TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
     "#,
