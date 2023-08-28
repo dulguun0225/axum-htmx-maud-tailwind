@@ -1,5 +1,5 @@
-use sqlx::{prelude::*, Pool, Postgres};
-
+use crate::db::get_pool;
+use sqlx::prelude::*;
 #[derive(Debug, FromRow, Clone)]
 pub struct Todo {
     pub id: i32,
@@ -9,8 +9,9 @@ pub struct Todo {
     // pub updated_at: i64,
 }
 
-pub async fn get_all(pool: &Pool<Postgres>) -> Vec<Todo> {
-    let todos = sqlx::query_as::<_, Todo>(
+pub async fn get_all() -> Vec<Todo> {
+    let pool = get_pool().await;
+    sqlx::query_as::<_, Todo>(
         r#"
             SELECT id, title, done 
             FROM todos 
@@ -18,12 +19,11 @@ pub async fn get_all(pool: &Pool<Postgres>) -> Vec<Todo> {
     )
     .fetch_all(pool)
     .await
-    .unwrap();
-
-    todos
+    .unwrap()
 }
 
-pub async fn insert(pool: &Pool<Postgres>, title: &str) -> anyhow::Result<Todo> {
+pub async fn insert(title: &str) -> anyhow::Result<Todo> {
+    let pool = get_pool().await;
     let todo = sqlx::query_as::<_, Todo>(
         "INSERT INTO todos (title) VALUES ($1) RETURNING id, title, done",
     )
@@ -34,7 +34,8 @@ pub async fn insert(pool: &Pool<Postgres>, title: &str) -> anyhow::Result<Todo> 
     Ok(todo)
 }
 
-pub async fn toggle(pool: &Pool<Postgres>, id: &i64) -> anyhow::Result<bool> {
+pub async fn toggle(id: &i64) -> anyhow::Result<bool> {
+    let pool = get_pool().await;
     let res: (bool,) = sqlx::query_as(
         r#"
         UPDATE todos
@@ -49,7 +50,8 @@ pub async fn toggle(pool: &Pool<Postgres>, id: &i64) -> anyhow::Result<bool> {
     Ok(res.0)
 }
 
-pub async fn delete(pool: &Pool<Postgres>, id: &i64) -> anyhow::Result<()> {
+pub async fn delete(id: &i64) -> anyhow::Result<()> {
+    let pool = get_pool().await;
     let res = sqlx::query(
         r#"
         DELETE FROM todos

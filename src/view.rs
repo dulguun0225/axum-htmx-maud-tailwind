@@ -11,8 +11,8 @@ fn header() -> Markup {
     }
 }
 
-pub static DONE: &'static str = "☑";
-pub static NOT_DONE: &'static str = "☐";
+pub static DONE: &str = "☑";
+pub static NOT_DONE: &str = "☐";
 
 pub fn todo_done_indicator(done: bool) -> &'static str {
     if done {

@@ -1,24 +1,33 @@
 pub mod todo;
 
 use sqlx::{postgres::PgPoolOptions, query, Pool, Postgres};
-
+use tokio::sync::OnceCell;
+use tracing::*;
 
 pub static DB_STRING: &str = "postgres://postgres:postgres@localhost/todos";
 
-pub async fn init() -> Pool<Postgres> {
-    let result = PgPoolOptions::new()
-        .max_connections(8)
-        .connect(DB_STRING)
-        .await;
+static POOL: OnceCell<Pool<Postgres>> = OnceCell::const_new();
 
-    let pool = match result {
-        Ok(pool) => pool,
-        Err(e) => {
-            tracing::error!("{}", e.to_string());
-            panic!("Cannot connect to database {DB_STRING}");
+pub async fn get_pool() -> &'static Pool<Postgres> {
+    POOL.get_or_init(|| async {
+        let result = PgPoolOptions::new()
+            .max_connections(8)
+            .connect(DB_STRING)
+            .await;
+
+        match result {
+            Ok(new_pool) => new_pool,
+            Err(e) => {
+                error!("DB Error. Cannot connect to {}. {}", DB_STRING, e);
+                panic!("{e:?}");
+            }
         }
-    };
+    })
+    .await
+}
 
+pub async fn init() {
+    let pool = get_pool().await;
     let create_tables_result = query(
         r#"
         CREATE TABLE IF NOT EXISTS todos (
@@ -30,7 +39,7 @@ pub async fn init() -> Pool<Postgres> {
         )
     "#,
     )
-    .execute(&pool)
+    .execute(pool)
     .await;
 
     match create_tables_result {
@@ -42,6 +51,4 @@ pub async fn init() -> Pool<Postgres> {
             panic!("Cannot create tables {DB_STRING}");
         }
     }
-
-    pool
 }
