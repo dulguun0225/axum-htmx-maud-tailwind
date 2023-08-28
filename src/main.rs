@@ -1,5 +1,6 @@
 mod app;
 mod db;
+pub mod prelude;
 mod tracing;
 pub mod view;
 

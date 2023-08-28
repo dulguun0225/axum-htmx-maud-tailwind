@@ -1,6 +1,5 @@
-use maud::{html, Markup, DOCTYPE};
-
 use crate::db::todo::Todo;
+use maud::{html, Markup, DOCTYPE};
 
 fn header() -> Markup {
     html! {

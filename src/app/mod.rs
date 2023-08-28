@@ -1,9 +1,6 @@
-use axum::{
-    extract::Path,
-    response::IntoResponse,
-    routing::*,
-    Form, Router,
-};
+use axum::{extract::Path, response::IntoResponse, routing::*, Form, Router};
+use prelude::*;
+
 use maud::Markup;
 use serde::Deserialize;
 use std::net::SocketAddr;
@@ -21,18 +18,18 @@ struct InsertInput {
     title: String,
 }
 
-async fn insert_handler(Form(data): Form<InsertInput>) -> Markup {
-    let todo = db::todo::insert(&data.title).await.unwrap();
-    view::todo_list_item(&todo)
+async fn insert_handler(Form(data): Form<InsertInput>) -> Result<Markup, AppError> {
+    let todo = db::todo::insert(&data.title).await?;
+    Ok(view::todo_list_item(&todo))
 }
 
-async fn toggle_handler(Path(id): Path<i64>) -> &'static str {
-    let toggle_result = crate::db::todo::toggle(&id).await.unwrap();
-
-    crate::view::todo_done_indicator(toggle_result)
+async fn toggle_handler(Path(id): Path<i64>) -> Result<&'static str, AppError> {
+    let toggle_result = crate::db::todo::toggle(&id).await?;
+    Ok(crate::view::todo_done_indicator(toggle_result))
 }
-async fn delete_handler(Path(id): Path<i64>) {
-    db::todo::delete(&id).await.unwrap();
+async fn delete_handler(Path(id): Path<i64>) -> Result<(), AppError> {
+    db::todo::delete(&id).await?;
+    Ok(())
 }
 pub async fn start() {
     db::init().await;
