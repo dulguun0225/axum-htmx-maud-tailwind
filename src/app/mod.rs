@@ -1,8 +1,9 @@
-use axum::{routing::*, response::{ Redirect}};
+use prelude::*;
+
+use axum::{response::Redirect, routing::*};
 
 use std::net::SocketAddr;
 use tower_http::services::ServeDir;
-
 
 pub async fn start() {
     let public_dir = ServeDir::new("public");
@@ -13,7 +14,7 @@ pub async fn start() {
         .fallback_service(public_dir);
     // run our app with hyper, listening globally on port 3000
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    tracing::debug!("listening on {}", addr);
+    info!("listening on {}", addr);
 
     axum::Server::bind(&addr)
         .serve(router.into_make_service())
