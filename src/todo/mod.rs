@@ -9,6 +9,7 @@ use serde::Deserialize;
 
 async fn index() -> Result<Markup, AppError> {
     let todos = db::get_all().await?;
+    info!("{todos:?}");
     Ok(view::index(&todos))
 }
 
@@ -23,9 +24,9 @@ async fn insert_handler(Form(data): Form<InsertInput>) -> Result<Markup, AppErro
     Ok(view::todo_list_item(&todo))
 }
 
-async fn toggle_handler(Path(id): Path<i64>) -> Result<&'static str, AppError> {
+async fn toggle_handler(Path(id): Path<i64>) -> Result<Markup, AppError> {
     let toggle_result = db::toggle(&id).await?;
-    Ok(view::todo_done_indicator(toggle_result))
+    Ok(view::todo_list_item(&toggle_result))
 }
 async fn delete_handler(Path(id): Path<i64>) -> Result<(), AppError> {
     db::delete(&id).await?;

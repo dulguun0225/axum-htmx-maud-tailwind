@@ -18,9 +18,10 @@ lazy_static = "1.4.0"
 maud = { version = "0.25.0", features = ["axum"] }
 serde = { version = "1.0.188", features = ["derive"] }
 sqlx = { version = "0.7.1", features = [
+  "default",
+  "chrono",
   "runtime-tokio-rustls",
   "postgres",
-  "default",
 ] }
 tokio = { version = "1.32.0", features = ["full"] }
 tower = { version = "0.4.13", features = ["full"] }

@@ -27,11 +27,17 @@ pub fn todo_list_item(todo: &Todo) -> Markup {
 
     html! {
         tr #(item_id){
-            td #(done_id) hx-patch={"/todo/"(todo.id)} hx-swap="innerHTML" style="cursor: default; user-select: none; font-size: 2rem" {
+            td #(done_id) hx-patch={"/todo/"(todo.id)} hx-swap="outerHTML" hx-target={"#"(item_id)} style="cursor: default; user-select: none; font-size: 2rem" {
                 (todo_done_indicator(todo.done))
             }
             td  style="cursor: default; user-select: none;"  {
                 (todo.title)
+            }
+            td { (todo.created_at.to_rfc3339()) }
+            td {
+                @if todo.updated_at.is_some() {
+                    (todo.updated_at.unwrap().to_rfc3339())
+                }
             }
             td {
                 button type="button" hx-delete={"/todo/"(todo.id)} hx-swap="delete" hx-target={"#"(item_id)} { "Delete" }
@@ -59,6 +65,8 @@ pub fn index(todos: &[Todo]) -> Markup {
                         tr {
                             th { "done"}
                             th { "title"}
+                            th { "created at" }
+                            th { "updated at" }
                             th { "actions" }
                         }
                     }

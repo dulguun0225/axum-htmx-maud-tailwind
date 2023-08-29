@@ -6,14 +6,14 @@ pub struct Todo {
     pub id: i32,
     pub title: String,
     pub done: bool,
-    // pub created_at: i64,
-    // pub updated_at: i64,
+    pub created_at: DateTime<Local>,
+    pub updated_at: Option<DateTime<Local>>,
 }
 
 pub async fn get_all() -> anyhow::Result<Vec<Todo>> {
     Ok(sqlx::query_as::<_, Todo>(
         r#"
-            SELECT id, title, done 
+            SELECT *
             FROM todos 
             ORDER BY id"#,
     )
@@ -30,19 +30,21 @@ pub async fn insert(title: &str) -> anyhow::Result<Todo> {
     Ok(todo)
 }
 
-pub async fn toggle(id: &i64) -> anyhow::Result<bool> {
-    let res: (bool,) = sqlx::query_as(
+pub async fn toggle(id: &i64) -> anyhow::Result<Todo> {
+    let todo = sqlx::query_as::<_, Todo>(
         r#"
         UPDATE todos
-        SET done = NOT done
+        SET 
+            done = NOT done,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
-        RETURNING done"#,
+        RETURNING *"#,
     )
     .bind(id)
     .fetch_one(pool::get().await)
     .await?;
 
-    Ok(res.0)
+    Ok(todo)
 }
 
 pub async fn delete(id: &i64) -> anyhow::Result<Todo> {
