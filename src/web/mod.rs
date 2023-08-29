@@ -5,7 +5,10 @@ use axum::{response::Redirect, routing::*};
 use std::net::SocketAddr;
 use tower_http::services::ServeDir;
 
-pub async fn start() {
+pub async fn start() -> anyhow::Result<()> {
+    let pool = pool::get().await;
+    sqlx::migrate!().run(pool).await?;
+
     let public_dir = ServeDir::new("public");
     let router = Router::new()
         .route("/", get(Redirect::permanent("/todo")))
@@ -18,6 +21,7 @@ pub async fn start() {
 
     axum::Server::bind(&addr)
         .serve(router.into_make_service())
-        .await
-        .unwrap();
+        .await?;
+
+    Ok(())
 }

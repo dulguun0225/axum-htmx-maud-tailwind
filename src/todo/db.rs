@@ -1,32 +1,6 @@
 use prelude::*;
 use sqlx::prelude::*;
 
-pub async fn init() {
-    let create_tables_result = sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS todos (
-            id serial PRIMARY KEY,
-            title text NOT NULL,
-            CHECK (title <> ''),
-            done boolean NOT NULL DEFAULT false,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-    "#,
-    )
-    .execute(pool::get().await)
-    .await;
-
-    match create_tables_result {
-        Ok(r) => {
-            debug!("Create table result {:?}", r);
-        }
-        Err(e) => {
-            tracing::error!("{}", e.to_string());
-            panic!("Cannot create tables");
-        }
-    }
-}
 #[derive(Debug, FromRow, Clone)]
 pub struct Todo {
     pub id: i32,
@@ -36,16 +10,15 @@ pub struct Todo {
     // pub updated_at: i64,
 }
 
-pub async fn get_all() -> Vec<Todo> {
-    sqlx::query_as::<_, Todo>(
+pub async fn get_all() -> anyhow::Result<Vec<Todo>> {
+    Ok(sqlx::query_as::<_, Todo>(
         r#"
             SELECT id, title, done 
             FROM todos 
             ORDER BY id"#,
     )
     .fetch_all(pool::get().await)
-    .await
-    .unwrap()
+    .await?)
 }
 
 pub async fn insert(title: &str) -> anyhow::Result<Todo> {

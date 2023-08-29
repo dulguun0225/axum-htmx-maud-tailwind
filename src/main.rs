@@ -1,9 +1,10 @@
-mod app;
 mod todo;
 mod tracing;
+mod web;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     tracing::init();
-    app::start().await;
+    web::start().await?;
+    Ok(())
 }

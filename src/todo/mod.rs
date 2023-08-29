@@ -1,15 +1,15 @@
 mod db;
 mod view;
 
-use axum::{extract::Path, response::IntoResponse, routing::*, Form, Router};
+use axum::{extract::Path, routing::*, Form, Router};
 use prelude::*;
 
 use maud::Markup;
 use serde::Deserialize;
 
-async fn index() -> impl IntoResponse {
-    let todos = db::get_all().await;
-    view::index(&todos)
+async fn index() -> Result<Markup, AppError> {
+    let todos = db::get_all().await?;
+    Ok(view::index(&todos))
 }
 
 #[derive(Deserialize, Debug)]
@@ -32,7 +32,6 @@ async fn delete_handler(Path(id): Path<i64>) -> Result<(), AppError> {
     Ok(())
 }
 pub async fn new() -> Router {
-    db::init().await;
     Router::new()
         .route("/", get(index).post(insert_handler))
         .route("/:id", patch(toggle_handler).delete(delete_handler))
